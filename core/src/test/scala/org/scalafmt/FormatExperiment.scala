@@ -60,9 +60,10 @@ trait FormatExperiment extends ScalaProjectsExperiment with FormatAssertions {
           val elapsed = System.nanoTime() - startTime
           assertFormatPreservesAst[Source](code, formatted)
           val formattedSecondTime = Scalafmt
-            .format(formatted,
-                    ScalafmtConfig.default.copy(
-                      assumeStandardLibraryStripMargin = false))
+            .format(
+              formatted,
+              ScalafmtConfig.default.copy(
+                assumeStandardLibraryStripMargin = false))
             .get
           try {
             assertNoDiff(formattedSecondTime, formatted, "Idempotency")

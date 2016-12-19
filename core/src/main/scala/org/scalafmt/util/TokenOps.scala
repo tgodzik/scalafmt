@@ -155,8 +155,9 @@ object TokenOps {
     newlinesBetween(between) match {
       case 0 => Space
       case x =>
-        NewlineT(isDouble = x == 2,
-                 noIndent = rightIsComment && endsWithNoIndent(between))
+        NewlineT(
+          isDouble = x == 2,
+          noIndent = rightIsComment && endsWithNoIndent(between))
     }
 
   // TODO(olafur) calculate this once inside getSplits.

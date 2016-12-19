@@ -76,10 +76,11 @@ lazy val publishSettings = Seq(
 )
 
 lazy val credentialSettings = Seq(
-  credentials += Credentials("Sonatype Nexus Repository Manager",
-                             "oss.sonatype.org",
-                             "olafurpg@gmail.com",
-                             sonatypePassword)
+  credentials += Credentials(
+    "Sonatype Nexus Repository Manager",
+    "oss.sonatype.org",
+    "olafurpg@gmail.com",
+    sonatypePassword)
 )
 
 lazy val noPublish = Seq(
@@ -253,10 +254,11 @@ lazy val benchmarks = project
   .enablePlugins(JmhPlugin)
 
 lazy val readme = scalatex
-  .ScalatexReadme(projectId = "readme",
-                  wd = file(""),
-                  url = "https://github.com/olafurpg/scalafmt/tree/master",
-                  source = "Readme")
+  .ScalatexReadme(
+    projectId = "readme",
+    wd = file(""),
+    url = "https://github.com/olafurpg/scalafmt/tree/master",
+    source = "Readme")
   .settings(allSettings)
   .settings(noPublish)
   .dependsOn(core)

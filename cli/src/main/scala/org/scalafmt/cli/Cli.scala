@@ -121,8 +121,9 @@ object Cli {
     val customFiles: Seq[AbsoluteFile] =
       expandCustomFiles(
         options.common.workingDirectory,
-        AbsoluteFile.fromFiles(project.files.map(new File(_)),
-                               options.common.workingDirectory))
+        AbsoluteFile.fromFiles(
+          project.files.map(new File(_)),
+          options.common.workingDirectory))
     (customFiles ++ projectFiles).filter(matcher.matches)
   }
 

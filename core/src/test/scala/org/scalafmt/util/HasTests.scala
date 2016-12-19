@@ -101,14 +101,15 @@ trait HasTests extends FunSuiteLike with FormatAssertions {
       val before :: expected :: Nil = t.split("\n>>>\n", 2).toList
       val name :: original :: Nil = before.split("\n", 2).toList
       val actualName = stripPrefix(name)
-      DiffTest(spec,
-               actualName,
-               filename,
-               original,
-               expected,
-               moduleSkip || isSkip(name),
-               moduleOnly || isOnly(name),
-               style)
+      DiffTest(
+        spec,
+        actualName,
+        filename,
+        original,
+        expected,
+        moduleSkip || isSkip(name),
+        moduleOnly || isOnly(name),
+        style)
     }
   }
 
@@ -156,8 +157,9 @@ trait HasTests extends FunSuiteLike with FormatAssertions {
             .copy(arrowEnumeratorGenerator = true)
         )
       case "noIndentOperators" =>
-        ScalafmtConfig.unitTest80.copy(unindentTopLevelOperators = true,
-                                       indentOperator = IndentOperator.akka)
+        ScalafmtConfig.unitTest80.copy(
+          unindentTopLevelOperators = true,
+          indentOperator = IndentOperator.akka)
       case "unicode" =>
         ScalafmtConfig.unitTest80.copy(
           rewriteTokens = Map(
@@ -199,13 +201,14 @@ trait HasTests extends FunSuiteLike with FormatAssertions {
     val visitedStates = Debug.exploredInTest
     val output = getFormatOutput(t.style, onlyOne)
     val obtainedHtml = Report.mkHtml(output, t.style)
-    Result(t,
-           obtained,
-           obtainedHtml,
-           output,
-           Debug.maxVisitedToken,
-           visitedStates,
-           Debug.elapsedNs)
+    Result(
+      t,
+      obtained,
+      obtainedHtml,
+      output,
+      Debug.maxVisitedToken,
+      visitedStates,
+      Debug.elapsedNs)
   }
 
   def ignore(t: DiffTest): Boolean = false
@@ -256,9 +259,10 @@ trait HasTests extends FunSuiteLike with FormatAssertions {
     new FormatWriter(Debug.formatOps)
       .reconstructPath(Debug.tokens, Debug.state.splits, debug = onlyOne) {
         case (_, token, whitespace) =>
-          builder += FormatOutput(token.left.syntax,
-                                  whitespace,
-                                  Debug.formatTokenExplored(token))
+          builder += FormatOutput(
+            token.left.syntax,
+            whitespace,
+            Debug.formatTokenExplored(token))
       }
     builder.result()
   }

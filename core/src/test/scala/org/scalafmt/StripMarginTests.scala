@@ -140,8 +140,9 @@ val msg = s'''AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
     val formatted = Scalafmt.format(t.original, style).get
     saveResult(t, formatted, t.only)
     assertNoDiff(formatted, t.expected)
-    assertNoDiff(Scalafmt.format(formatted, style).get,
-                 formatted,
-                 "Idempotency violated")
+    assertNoDiff(
+      Scalafmt.format(formatted, style).get,
+      formatted,
+      "Idempotency violated")
   }
 }

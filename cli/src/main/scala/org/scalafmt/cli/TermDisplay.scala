@@ -470,11 +470,12 @@ class TermDisplay(
   override def startTask(msg: String, file: File): Unit =
     updateThread.newEntry(
       msg,
-      DownloadInfo(0L,
-                   0L,
-                   None,
-                   System.currentTimeMillis(),
-                   updateCheck = false),
+      DownloadInfo(
+        0L,
+        0L,
+        None,
+        System.currentTimeMillis(),
+        updateCheck = false),
       s"$msg\n"
     )
 
@@ -485,8 +486,9 @@ class TermDisplay(
     assert(info != null)
     val newInfo = info match {
       case info0: DownloadInfo =>
-        info0.copy(length = Some(totalLength),
-                   previouslyDownloaded = alreadyDownloaded)
+        info0.copy(
+          length = Some(totalLength),
+          previouslyDownloaded = alreadyDownloaded)
       case _ =>
         throw new Exception(s"Incoherent display state for $url")
     }

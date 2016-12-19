@@ -28,8 +28,9 @@ case class Policy(
     // TODO(olafur) optimize?
     val newPf: PartialFunction[Decision, Decision] = {
       case x =>
-        otherF.applyOrElse(f.applyOrElse(x, identity[Decision]),
-                           identity[Decision])
+        otherF.applyOrElse(
+          f.applyOrElse(x, identity[Decision]),
+          identity[Decision])
     }
     copy(f = newPf)
   }

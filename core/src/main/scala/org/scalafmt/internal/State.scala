@@ -49,13 +49,14 @@ final case class State(cost: Int,
 }
 
 object State {
-  val start = State(0,
-                    PolicySummary.empty,
-                    Vector.empty[Split],
-                    0,
-                    Vector.empty[Indent[Num]],
-                    0,
-                    formatOff = false)
+  val start = State(
+    0,
+    PolicySummary.empty,
+    Vector.empty[Split],
+    0,
+    Vector.empty[Indent[Num]],
+    0,
+    formatOff = false)
 
   /**
     * Calculates next State given split at tok.
@@ -116,13 +117,14 @@ object State {
       else if (TokenOps.isFormatOn(tok.right)) false
       else formatOff
 
-    State(cost + splitWithPenalty.cost,
-          // TODO(olafur) expire policy, see #18.
-          newPolicy,
-          splits :+ splitWithPenalty,
-          newIndent,
-          newIndents,
-          nextStateColumn,
-          nextFormatOff)
+    State(
+      cost + splitWithPenalty.cost,
+      // TODO(olafur) expire policy, see #18.
+      newPolicy,
+      splits :+ splitWithPenalty,
+      newIndent,
+      newIndents,
+      nextStateColumn,
+      nextFormatOff)
   }
 }

@@ -13,6 +13,7 @@ case class IndentOperator(
 
 object IndentOperator {
   val default = IndentOperator()
-  val akka = IndentOperator(ScalafmtConfig.indentOperatorsIncludeAkka,
-                            ScalafmtConfig.indentOperatorsExcludeAkka)
+  val akka = IndentOperator(
+    ScalafmtConfig.indentOperatorsIncludeAkka,
+    ScalafmtConfig.indentOperatorsExcludeAkka)
 }

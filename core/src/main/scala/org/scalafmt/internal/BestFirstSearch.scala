@@ -97,9 +97,10 @@ class BestFirstSearch(val formatOps: FormatOps,
     val split = Split(Provided(formatToken.between.map(_.syntax).mkString), 0)
     val result =
       if (formatToken.left.is[LeftBrace])
-        split.withIndent(Num(2),
-                         matchingParentheses(hash(formatToken.left)),
-                         Right)
+        split.withIndent(
+          Num(2),
+          matchingParentheses(hash(formatToken.left)),
+          Right)
       else split
     result
   }
@@ -207,9 +208,10 @@ class BestFirstSearch(val formatOps: FormatOps,
           visits.clear()
           if (!initStyle.bestEffortInDeeplyNestedCode) {
             runner.eventCallback(CompleteFormat(explored, deepestYet, tokens))
-            throw SearchStateExploded(deepestYet,
-                                      formatWriter.mkString(deepestYet.splits),
-                                      tokens(deepestYet.splits.length).left)
+            throw SearchStateExploded(
+              deepestYet,
+              formatWriter.mkString(deepestYet.splits),
+              tokens(deepestYet.splits.length).left)
           } else if (pathologicalEscapes >= maxEscapes) {
             Q.enqueue(untilNextStatement(curr, Integer.MAX_VALUE))
           } else {

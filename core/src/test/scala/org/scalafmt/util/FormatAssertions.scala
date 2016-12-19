@@ -42,8 +42,9 @@ trait FormatAssertions extends FunSuiteLike with DiffAssertions {
   def formatAst(ast: String): String = {
     import scala.sys.process._
     val input = new ByteArrayInputStream(ast.getBytes("UTF-8"))
-    val command = List("clang-format",
-                       "-style={ContinuationIndentWidth: 2, ColumnLimit: 120}")
+    val command = List(
+      "clang-format",
+      "-style={ContinuationIndentWidth: 2, ColumnLimit: 120}")
     (command #< input).!!.trim
   }
 

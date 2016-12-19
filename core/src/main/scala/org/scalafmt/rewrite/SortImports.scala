@@ -53,9 +53,10 @@ object SortImports extends Rewrite {
                   .toMap
               `import`.importees.zipWithIndex.collect {
                 case (importee, i) =>
-                  Patch(importee.tokens.head,
-                        importee.tokens.last,
-                        sortedImporteesByIndex(i))
+                  Patch(
+                    importee.tokens.head,
+                    importee.tokens.last,
+                    sortedImporteesByIndex(i))
               }
             }
           }

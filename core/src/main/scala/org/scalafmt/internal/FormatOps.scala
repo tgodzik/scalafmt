@@ -266,8 +266,9 @@ class FormatOps(val tree: Tree, val initStyle: ScalafmtConfig) {
         })
 
       // Newline on every comma.
-      case d @ Decision(t @ FormatToken(comma @ Comma(), right, between),
-                        splits)
+      case d @ Decision(
+            t @ FormatToken(comma @ Comma(), right, between),
+            splits)
           if owners(open) == owners(comma) &&
             // TODO(olafur) what the right { decides to be single line?
             !right.is[LeftBrace] &&

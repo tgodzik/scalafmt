@@ -30,10 +30,11 @@ case class TestStats(createdAt: Long,
 object TestStats {
 
   def apply(results: Seq[Result]): TestStats =
-    TestStats(System.currentTimeMillis(),
-              results,
-              JavaInfo(),
-              OsInfo(),
-              RuntimeInfo(),
-              GitInfo())
+    TestStats(
+      System.currentTimeMillis(),
+      results,
+      JavaInfo(),
+      OsInfo(),
+      RuntimeInfo(),
+      GitInfo())
 }

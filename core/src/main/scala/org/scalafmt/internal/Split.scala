@@ -63,13 +63,14 @@ case class Split(
 
   def withOptimalToken(token: Token, killOnFail: Boolean = false): Split = {
     require(optimalAt.isEmpty)
-    new Split(modification,
-              cost,
-              ignoreIf,
-              indents,
-              policy,
-              true,
-              Some(OptimalToken(token, killOnFail)))(line)
+    new Split(
+      modification,
+      cost,
+      ignoreIf,
+      indents,
+      policy,
+      true,
+      Some(OptimalToken(token, killOnFail)))(line)
   }
 
   def withPolicy(newPolicy: Policy): Split = {
@@ -82,25 +83,27 @@ case class Split(
   }
 
   def withPenalty(penalty: Int): Split =
-    new Split(modification,
-              cost + penalty,
-              ignoreIf,
-              indents,
-              policy,
-              true,
-              optimalAt)(line)
+    new Split(
+      modification,
+      cost + penalty,
+      ignoreIf,
+      indents,
+      policy,
+      true,
+      optimalAt)(line)
 
   def withIndent(length: Length, expire: Token, expiresOn: ExpiresOn): Split = {
     length match {
       case Num(0) => this
       case _ =>
-        new Split(modification,
-                  cost,
-                  ignoreIf,
-                  Indent(length, expire, expiresOn) +: indents,
-                  policy,
-                  penalty,
-                  optimalAt)(line)
+        new Split(
+          modification,
+          cost,
+          ignoreIf,
+          Indent(length, expire, expiresOn) +: indents,
+          policy,
+          penalty,
+          optimalAt)(line)
     }
   }
 
