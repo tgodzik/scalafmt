@@ -872,9 +872,11 @@ class Router(formatOps: FormatOps) {
             // many arguments on the same line can be hard to read. By not
             // putting a newline before the dot, we force the argument list
             // to break into multiple lines.
-            splitApplyIntoLhsAndArgsLifted(owners(next(next(tok)).right)).map {
-              case (_, lst) => Math.max(0, lst.length - 1)
-            }.getOrElse(0)
+            splitApplyIntoLhsAndArgsLifted(owners(next(next(tok)).right))
+              .map {
+                case (_, lst) => Math.max(0, lst.length - 1)
+              }
+              .getOrElse(0)
           } else 0
         if (TokenOps.isSymbolicIdent(left))
           Seq(Split(NoSplit, 0))

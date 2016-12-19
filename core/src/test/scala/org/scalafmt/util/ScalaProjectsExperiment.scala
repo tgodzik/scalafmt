@@ -139,11 +139,13 @@ trait ScalaProjectsExperiment {
   }
 
   private def col(strings: Any*): String =
-    strings.map { s =>
-      val x = s match {
-        case d: Double => numberFormat.format(d)
-        case _ => s
+    strings
+      .map { s =>
+        val x = s match {
+          case d: Double => numberFormat.format(d)
+          case _ => s
+        }
+        x.toString.slice(0, colLength - 2).padTo(colLength - 1, " ").mkString
       }
-      x.toString.slice(0, colLength - 2).padTo(colLength - 1, " ").mkString
-    }.mkString(" ")
+      .mkString(" ")
 }
