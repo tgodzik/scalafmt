@@ -1,5 +1,5 @@
 maxColumn = 40
-<<< ONLY Spaces in paretheses
+<<< Spaces in paretheses
 function(a, b, c)
 >>>
 function( a, b, c )
