@@ -14,11 +14,12 @@ For any questions, don't hesitate to ask on gitter.
 
 - Run formatting tests: `core/testOnly org.scalafmt.FormatTests`.
 - Write new formatting test: read [this doc](core/src/test/resources/readme.md).
-- Build docs: `sbt readme/run` will produce the docs, which you can open with
+- Build docs: `sbt readme/run` will create the docs, which you can open with
   `open readme/target/scalatex/index.html`. Docs are built with [Scalatex](http://www.lihaoyi.com/Scalatex/).
 - Run jmh benchmarks: `run-benchmarks.sh`.
 - Run formatter on millions of lines of code: `core/test:runMain  org.scalafmt.FormatExperimentApp`:
 - Hack on IntelliJ plugin: see [this doc](intellij/readme.md).
+- Hack on SBT plugin: run `sbt scripted`.
 - Debug performance: after each test run in `FormatTests`, a flamegraph report
   like [this one](https://github.com/olafurpg/scalafmt/issues/140)
   is generated in `target/index.html`. 
@@ -43,40 +44,39 @@ function( a, b, c )
 
 - Clone the repo, cd into it, start `sbt` and then run `~core/testOnly org.scalafmt.FormatTests`.
   The unit tests should pass.
-- Open `ScalafmtStyle.scala` and add a member `spacesInParentheses: Boolean`.
-  Now you get a compiler error. Fix `ScalafmtStyle.default` style so that it
-  has `spacesInParentheses = true`. The code should compile now and all tests 
-  should pass.
-- Open `core/src/test/resources/unit/Hacking.stat` and you will see a test like this
+- Open `Spaces.scala` and add a member `inParentheses: Boolean = true`.
+  The code should compile now and all tests should pass.
+- Open `core/src/test/resources/spaces/Hacking.stat` and you will see a test like this
 
 ```scala
-40 columns                              |
+maxColumn = 40
 <<< SKIP Spaces in parentheses
 function(a, b, c)
 >>>
 function( a, b, c )
 ```
-- The column limit is 40 characters, because the test is in the `unit` directory.
+- The column limit is 40 characters, you can put any configuration at the top of
+  the file.
 - The test does not run because its name starts with SKIP.
 - Change SKIP to ONLY, save and sbt should now only run this test and give you
   a failing output like this:
 
 ```scala
-[debug] FormatWriter.scala:85                     NoSplit:56(cost=0, indents=[], NoPolicy) 0 0
-[debug] FormatWriter.scala:85                     NoSplit:56(cost=0, indents=[], NoPolicy) 0 8
-[debug] FormatWriter.scala:85     function        NoSplit:281(cost=0, indents=[], NoPolicy) 0 9
-[debug] FormatWriter.scala:85     (               NoSplit:448(cost=0, indents=[4], P:412(D=true)) 4 10
-[debug] FormatWriter.scala:85     a               NoSplit:494(cost=0, indents=[], NoPolicy) 4 11
-[debug] FormatWriter.scala:85     ,               Space:514(cost=0, indents=[], NoPolicy) 4 13
-[debug] FormatWriter.scala:85     b               NoSplit:494(cost=0, indents=[], NoPolicy) 4 14
-[debug] FormatWriter.scala:85     ,               Space:514(cost=0, indents=[], NoPolicy) 4 16
-[debug] FormatWriter.scala:85     c               NoSplit:1005(cost=0, indents=[], NoPolicy) 4 17
-[debug] FormatWriter.scala:85     )               Newline:60(cost=0, indents=[], NoPolicy) 0 0
-[debug] FormatWriter.scala:127    Total cost: 0
-[debug] FormatTests.scala:90      Split(line=56, count=1), Split(line=448, count=1), Split(line=514, count=1)
-[debug] FormatTests.scala:91      Total explored: 12
+[debug] FormatWriter.scala:118                    NoSplit:72(cost=0, indents=[], NoPolicy) 0 0
+[debug] FormatWriter.scala:118                    NoSplit:72(cost=0, indents=[], NoPolicy) 0 8
+[debug] FormatWriter.scala:118    function        NoSplit:350(cost=0, indents=[], NoPolicy) 0 9
+[debug] FormatWriter.scala:118    (               NoSplit:623(cost=0, indents=[], P:605(D=false)) 0 10
+[debug] FormatWriter.scala:118    a               NoSplit:696(cost=0, indents=[], NoPolicy) 0 11
+[debug] FormatWriter.scala:118    ,               Space:745(cost=0, indents=[], NoPolicy) 0 13
+[debug] FormatWriter.scala:118    b               NoSplit:696(cost=0, indents=[], NoPolicy) 0 14
+[debug] FormatWriter.scala:118    ,               Space:745(cost=0, indents=[], NoPolicy) 0 16
+[debug] FormatWriter.scala:118    c               NoSplit:1267(cost=0, indents=[], NoPolicy) 0 17
+[debug] FormatWriter.scala:118    )               Newline:76(cost=0, indents=[], NoPolicy) 0 0
+[debug] FormatWriter.scala:169    Total cost: 0
+[debug] FormatTests.scala:92      Split(line=623, count=2), Split(line=640, count=2), Split(line=632, count=2)
+[debug] FormatTests.scala:93      Total explored: 24
 [info] FormatTests:
-[info] - unit/Hacking.stat: Spaces in parentheses                               | *** FAILED *** (278 milliseconds)
+[info] - spaces/Hacking.stat: Spaces in paretheses                             | *** FAILED *** (275 milliseconds)
 [info]   ===========
 [info]   => Obtained
 [info]   ===========
@@ -87,19 +87,14 @@ function( a, b, c )
 [info]   => Diff
 [info]   =======
 [info]   -function(a, b, c)
-[info]   +function( a, b, c ) (FormatTests.scala:33)
-[info] Run completed in 443 milliseconds.
-[info] Total number of tests run: 1
-[info] Suites: completed 1, aborted 0
-[info] Tests: succeeded 0, failed 1, canceled 0, ignored 0, pending 0
-[info] *** 1 TEST FAILED ***
-[error] Failed tests:
+[info]   +function( a, b, c ) (FormatTests.scala:30)
 ```
 
 - Cool. The lines printed out from FormatWriter are interesting.
-  Look at the first line, it has `NoSplit:56(cost=0 ...)`.
+  Look at the first line, it has `NoSplit:72(cost=0 ...)`.
   This means that between the beginning of the file and the `function` token is a 
-  NoSplit that origins from line 56 in `core/src/main/scala/org/scalafmt/internal/Router.scala`.
+  `NoSplit` (not space or newline) that origins from line 72 in
+  [Router.scala](core/src/main/scala/org/scalafmt/internal/Router.scala#L72).
   Lets find that line:
   
 ```scala
@@ -270,30 +265,6 @@ case class FormatToken(left: Token, right: Token, between: Vector[Whitespace])
   of cases that still need more fixing but this is a great proof-of-concept.
   I recommend you get some feedback.
   
-## Contribution Guidelines
-
-Shamelessly stolen from [lihaoyi/ammonite](https://github.com/lihaoyi/Ammonite).
-
-- **All code PRs should come with**: a meaningful description, inline-comments
-  for important things, unit tests (positive and negative), and a green build
-  in [CI](https://travis-ci.org/olafurpg/scalafmt). Note, the tests format
-  1.2 million lines of code twice which takes ~1hr to run on travis.
-- **Format your code with the lastest release of scalafmt, default style.**.
-- **PRs for features should generally come with *something* added to the
-  [Documentation](https://olafurpg.github.io/scalafmt)**, so people can discover
-  that it exists. The docs are written in `readme/Readme.scalatex`.
-- **Be prepared to discuss/argue-for your changes if you want them merged**!
-  You will probably need to refactor so your changes fit into the larger
-  codebase - **If your code is hard to unit test, and you don't want to unit
-  test it, that's ok**. But be prepared to argue why that's the case!
-- **It's entirely possible your changes won't be merged**, or will get ripped
-  out later. This is also the case for my changes, as the Author!
-- **Even a rejected/reverted PR is valuable**! It helps explore the solution
-  space, and know what works and what doesn't. For every line in the repo, at
-  least three lines were tried, committed, and reverted/refactored, and more
-  than 10 were tried without committing.
-- **Feel free to send Proof-Of-Concept PRs** that you don't intend to get merged.
-
 ## Acknowledgements
 
 <a href="http://www.ej-technologies.com/products/jprofiler/overview.html">
