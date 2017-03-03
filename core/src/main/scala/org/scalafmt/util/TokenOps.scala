@@ -149,7 +149,7 @@ object TokenOps {
       implicit line: sourcecode.Line): Policy = {
     Policy(
       {
-        case Decision(tok, splits)
+        case d@Decision(tok, splits)
             if !tok.right.is[EOF] && tok.right.end <= expire.end &&
               exclude.forall(!_.contains(tok.left.start)) &&
               (disallowInlineComments || !isInlineComment(tok.left)) =>

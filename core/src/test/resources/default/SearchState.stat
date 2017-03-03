@@ -480,3 +480,29 @@ val TodoApp = ReactComponentB[Unit]("TodoApp")
                       ^.value := s.text),
                   <.button("Add #", s.items.length + 1))))
   .build
+<<< #719
+// scalafmt: { binPack.defnSite = true }
+class PropertyInfo18[
+uE, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14, P15, P16, P17, P18, R: Manifest](name: String, flags: Long, impl: (E, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14, P15, P16, P17, P18) => R) extends DefPropertyInfo[E, (E, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14, P15, P16, P17, P18) => Boolean, (E, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14, P15, P16, P17, P18) => R, R](name, flags)
+>>>
+// scalafmt: { binPack.defnSite = true }
+class PropertyInfo18[
+    uE, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14, P15, P16,
+    P17, P18, R: Manifest](name: String, flags: Long,
+    impl: (E, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14, P15,
+        P16, P17, P18) => R)
+    extends DefPropertyInfo[E,
+                            (E, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11,
+                                P12, P13, P14, P15, P16, P17, P18) => Boolean,
+                            (E, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11,
+                                P12, P13, P14, P15, P16, P17, P18) => R,
+                            R](name, flags)
+<<< ONLY #716
+ (Range(0, 10)).map { (i =>
+      println{
+        i
+      }
+    )
+    }
+>>>
+x
