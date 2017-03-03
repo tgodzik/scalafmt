@@ -1,0 +1,20 @@
+maxColumn = 100
+spaces.beforeSeqWildcard = true
+<<< Before Seq Wildcard
+assemblyMergeStrategy in assembly := {
+    case PathList(ps @ _ *) if ps.last == "javax.inject.Named"      => MergeStrategy.first
+    case PathList(ps @ _ *) if ps.last endsWith ".class"            => MergeStrategy.first
+    case PathList(ps @ _ *) if ps.last endsWith "module.properties" => MergeStrategy.first
+    case PathList(ps @ _ *) if ps.last == "MANIFEST.MF"             => MergeStrategy.rename
+    case "LICENSE"                                                  => MergeStrategy.first
+    case "NOTICE"                                                   => MergeStrategy.first
+}
+>>>
+assemblyMergeStrategy in assembly := {
+  case PathList(ps @ _*) if ps.last == "javax.inject.Named" => MergeStrategy.first
+  case PathList(ps @ _*) if ps.last endsWith ".class" => MergeStrategy.first
+  case PathList(ps @ _*) if ps.last endsWith "module.properties" => MergeStrategy.first
+  case PathList(ps @ _*) if ps.last == "MANIFEST.MF" => MergeStrategy.rename
+  case "LICENSE" => MergeStrategy.first
+  case "NOTICE" => MergeStrategy.first
+}
