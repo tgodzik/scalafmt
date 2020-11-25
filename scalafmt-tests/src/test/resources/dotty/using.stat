@@ -1,0 +1,19 @@
+maxColumn = 40
+<<< ONLY enum
+object Color {
+def hello(using a : Int)
+}
+>>>
+object Color {
+  def hello(using a: Int)
+}
+<<< ONLY using with single argument
+align.preset = none
+===
+  def apply(throughput: Int)(using context: ExecutionContext)
+      : SerializedSuspendableExecutionContext =
+     new SerializedSuspendableExecutionContext(throughput)
+>>>
+def apply(throughput: Int)(using
+    context: ExecutionContext): SerializedSuspendableExecutionContext =
+  new SerializedSuspendableExecutionContext(throughput)
