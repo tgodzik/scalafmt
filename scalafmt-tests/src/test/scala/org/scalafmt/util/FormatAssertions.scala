@@ -23,7 +23,12 @@ trait FormatAssertions extends DiffAssertions {
       case Parsed.Success(originalParsed) =>
         dialect(obtained).parse[T] match {
           case Parsed.Success(obtainedParsed) =>
-            StructurallyEqual(originalParsed, obtainedParsed) match {
+            val equality =
+              // if (dialect.allowSignificantIndentation)
+                // SemanticallyEqual(originalParsed, obtainedParsed)
+              // else
+                StructurallyEqual(originalParsed, obtainedParsed)
+            equality match {
               case Right(_) => // OK
               case Left(diff) =>
                 throw FormatterChangedAST(diff.toString, obtained)

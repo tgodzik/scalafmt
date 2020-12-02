@@ -1,5 +1,5 @@
 maxColumn = 40
-<<< ONLY enum
+<<< ONLY using
 object Color {
 def hello(using a : Int)
 }
