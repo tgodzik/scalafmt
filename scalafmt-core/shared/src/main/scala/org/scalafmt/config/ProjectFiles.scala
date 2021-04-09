@@ -40,7 +40,7 @@ object ProjectFiles {
   val defaultIncludePaths =
     Seq("glob:**.scala", "glob:**.sbt", "glob:**.sc")
 
-  private sealed abstract class PathMatcher {
+  sealed abstract class PathMatcher {
     def matches(path: file.Path): Boolean
   }
 
@@ -59,16 +59,47 @@ object ProjectFiles {
       )
     }
 
+     def nio(glob: String) = {
+      if (PlatformConfig.isNative)
+        new Regex(createRegexFromGlob(glob))
+      else
+         new Nio(glob)
+    }
+
     private def create(seq: Seq[String], f: String => PathMatcher) =
       seq.map(_.asFilename).distinct.map(f)
-    private def nio(seq: Seq[String]) = create(seq, new Nio(_))
+    private def nio(seq: Seq[String]) = {
+      if (PlatformConfig.isNative)
+        create(seq, p => new Regex(createRegexFromGlob(p)))
+      else
+        create(seq, new Nio(_))
+    }
     private def regex(seq: Seq[String]) = create(seq, new Regex(_))
 
-    private final class Nio(pattern: String) extends PathMatcher {
+    // TODO basic, might need rework https://stackoverflow.com/questions/1247772/is-there-an-equivalent-of-java-util-regex-for-glob-type-patterns
+    private def createRegexFromGlob(glob: String): String = {
+      val out = new StringBuilder
+      out.append("^")
+
+      for (ch <- glob.stripPrefix("glob:")) {
+        val changed = ch match {
+          case '*' => ".*"
+          case '?' => "."
+          case '.' => "\\."
+          case '\\' => "\\\\"
+          case other => other.toString()
+        }
+        out.append(changed)
+      }
+      out.append('$')
+      out.toString()
+    }
+
+    final class Nio(pattern: String) extends PathMatcher {
       private val matcher = fs.getPathMatcher(pattern)
       def matches(path: file.Path): Boolean = matcher.matches(path)
     }
-    private final class Regex(regex: String) extends PathMatcher {
+    final class Regex(regex: String) extends PathMatcher {
       private val pattern = java.util.regex.Pattern.compile(regex)
       def matches(path: file.Path): Boolean =
         pattern.matcher(path.toString).find()

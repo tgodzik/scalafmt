@@ -37,11 +37,6 @@ inThisBuild(
       Resolver.sonatypeRepo("releases"),
       Resolver.sonatypeRepo("snapshots")
     ),
-    libraryDependencies ++= List(
-      munit.value % Test,
-      scalacheck % Test,
-      scalametaTestkit % Test
-    ),
     testFrameworks += new TestFramework("munit.Framework")
   )
 )
@@ -64,7 +59,7 @@ commands += Command.command("ci-test") { s =>
     s
 }
 
-lazy val dynamic = project
+lazy val dynamic = crossProject(JVMPlatform, NativePlatform)
   .in(file("scalafmt-dynamic"))
   .settings(
     moduleName := "scalafmt-dynamic",
@@ -76,14 +71,24 @@ lazy val dynamic = project
       "io.get-coursier" % "interface" % "0.0.17",
       "com.typesafe" % "config" % "1.4.1",
       munit.value % Test,
-      scalametaTestkit % Test
+      scalametaTestkit.value % Test
     ),
     scalacOptions ++= scalacJvmOptions.value
+  )
+  .nativeSettings(
+    libraryDependencies ++= List(
+      // "org.ekrich" %%% "sconfig" % "x.y.z",
+      "org.ekrich" %%% "sjavatime" % "1.1.5"
+    ),
+    nativeLinkStubs := true
   )
   .dependsOn(interfaces)
   .enablePlugins(BuildInfoPlugin)
 
-lazy val interfaces = project
+lazy val dynamicJVM = dynamic.jvm
+lazy val dynamicNative = dynamic.native
+
+lazy val interfaces = crossProject(JVMPlatform, NativePlatform)
   .in(file("scalafmt-interfaces"))
   .settings(
     moduleName := "scalafmt-interfaces",
@@ -100,14 +105,16 @@ lazy val interfaces = project
     }
   )
 
-lazy val core = crossProject(JVMPlatform)
+lazy val interfacesJVM = interfaces.jvm
+lazy val interfacesNative = interfaces.native
+
+lazy val core = crossProject(JVMPlatform, NativePlatform)
   .in(file("scalafmt-core"))
   .settings(
     moduleName := "scalafmt-core",
     buildInfoSettings,
     scalacOptions ++= scalacJvmOptions.value,
     libraryDependencies ++= Seq(
-      metaconfig.value,
       scalameta.value,
       // scala-reflect is an undeclared dependency of fansi, see #1252.
       // Scalafmt itself does not require scala-reflect.
@@ -128,21 +135,23 @@ lazy val core = crossProject(JVMPlatform)
       }
     }
   )
-  // .jsSettings(
-  //   libraryDependencies ++= List(
-  //     metaconfigHocon.value,
-  //     scalatest.value % Test // must be here for coreJS/test to run anything
-  //   )
-  // )
+  .nativeSettings(
+    libraryDependencies ++= List(
+      metaconfigSconfig.value
+    ),
+    nativeLinkStubs := true
+  )
   .jvmSettings(
     Test / run / fork := true,
     libraryDependencies ++= List(
-      metaconfigTypesafe.value
+      metaconfigTypesafe.value,
+      metaconfig.value
     )
   )
   .enablePlugins(BuildInfoPlugin)
+
 lazy val coreJVM = core.jvm
-// lazy val coreJS = core.js
+lazy val coreNative = core.native
 
 import sbtassembly.AssemblyPlugin.defaultUniversalScript
 
@@ -160,7 +169,7 @@ val scalacJvmOptions = Def.setting {
   }
 }
 
-lazy val cli = project
+lazy val cli = crossProject(JVMPlatform, NativePlatform)
   .in(file("scalafmt-cli"))
   .settings(
     moduleName := "scalafmt-cli",
@@ -175,9 +184,8 @@ lazy val cli = project
         oldStrategy(x)
     },
     libraryDependencies ++= Seq(
-      "com.googlecode.java-diff-utils" % "diffutils" % "1.3.0",
-      "com.martiansoftware" % "nailgun-server" % "0.9.1",
-      "com.github.scopt" %% "scopt" % "4.0.1",
+      // "com.googlecode.java-diff-utils" % "diffutils" % "1.3.0",
+      "com.github.scopt" %%% "scopt" % "4.0.1",
       // undeclared transitive dependency of coursier-small
       "org.scala-lang.modules" %% "scala-xml" % "1.3.0"
     ),
@@ -196,28 +204,47 @@ lazy val cli = project
           .toSeq
     }
   )
-  .dependsOn(coreJVM, dynamic)
+  .jvmSettings {
+    libraryDependencies += "com.martiansoftware" % "nailgun-server" % "0.9.1",
+  }
+  .nativeSettings {
+    nativeLinkStubs := true
+  }
+  .dependsOn(core, dynamic)
   .enablePlugins(GraalVMNativeImagePlugin)
 
-lazy val tests = project
+lazy val cliJVM = cli.jvm
+lazy val cliNative = cli.native
+
+lazy val tests = crossProject(JVMPlatform, NativePlatform)
   .in(file("scalafmt-tests"))
   .settings(
     publish / skip := true,
     libraryDependencies ++= Seq(
       // Test dependencies
-      "com.lihaoyi" %% "scalatags" % "0.9.4",
-      scalametaTestkit,
+      "com.lihaoyi" %%% "scalatags" % "0.9.4",
+      scalametaTestkit.value,
       munit.value
     ),
     scalacOptions ++= scalacJvmOptions.value,
-    javaOptions += "-Dfile.encoding=UTF8",
     buildInfoPackage := "org.scalafmt.tests",
     buildInfoKeys := Seq[BuildInfoKey](
-      "resourceDirectory" -> (Test / resourceDirectory).value
+      "resourceDirectory" -> (baseDirectory.value / ".." / "shared" / "src" / "test" / "resources")
     )
   )
   .enablePlugins(BuildInfoPlugin)
-  .dependsOn(coreJVM, dynamic, cli)
+  .dependsOn(core, dynamic, cli)  
+  .nativeSettings(
+    nativeConfig ~= {
+      _.withMode(scalanative.build.Mode.debug)
+        .withLinkStubs(true)
+    }
+  ).jvmSettings(
+    javaOptions += "-Dfile.encoding=UTF8"
+  )
+
+lazy val testsJVM = tests.jvm
+lazy val testsNative = tests.native
 
 lazy val benchmarks = project
   .in(file("scalafmt-benchmarks"))
@@ -225,7 +252,7 @@ lazy val benchmarks = project
     publish / skip := true,
     moduleName := "scalafmt-benchmarks",
     libraryDependencies ++= Seq(
-      scalametaTestkit
+      scalametaTestkit.value
     ),
     run / javaOptions ++= Seq(
       "-Djava.net.preferIPv4Stack=true",
@@ -254,7 +281,7 @@ lazy val docs = project
     publish / skip := true,
     mdoc := (Compile / run).evaluated
   )
-  .dependsOn(cli, dynamic)
+  .dependsOn(cliJVM, dynamicJVM)
   .enablePlugins(DocusaurusPlugin)
 
 val V = "\\d+\\.\\d+\\.\\d+"

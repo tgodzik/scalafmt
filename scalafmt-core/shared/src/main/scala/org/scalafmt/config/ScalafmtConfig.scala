@@ -156,10 +156,9 @@ case class ScalafmtConfig(
   def forSbt: ScalafmtConfig = copy(runner = runner.forSbt)
 
   private lazy val expandedFileOverride = Try {
-    val fs = file.FileSystems.getDefault
     fileOverride.values.map { case (pattern, conf) =>
       val style = ScalafmtConfig.decoder.read(Some(this), conf).get
-      fs.getPathMatcher(pattern.asFilename) -> style
+      ProjectFiles.FileMatcher.nio(pattern.asFilename) -> style
     }
   }
   def getConfigFor(filename: String): ScalafmtConfig = {

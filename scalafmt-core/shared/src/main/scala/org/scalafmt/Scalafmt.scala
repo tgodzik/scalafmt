@@ -19,6 +19,7 @@ import org.scalafmt.internal.FormatOps
 import org.scalafmt.internal.FormatWriter
 import org.scalafmt.rewrite.Rewrite
 import org.scalafmt.util.FileOps
+import org.scalafmt.internal.PlatformCompat
 
 /** WARNING. This API is discouraged when integrating with Scalafmt from a build tool
   * or editor plugin. It is recommended to use the `scalafmt-dynamic` module instead.
@@ -91,23 +92,23 @@ object Scalafmt {
   }
 
   // see: https://ammonite.io/#Save/LoadSession
-  private val ammonitePattern: Regex = "(?:\\s*\\n@(?=\\s))+".r
+  private val ammonitePattern: Regex = PlatformCompat.ammonitePattern
 
   private def doFormat(
       code: String,
       style: ScalafmtConfig,
       file: String,
       range: Set[Range] = Set.empty
-  ): Try[String] =
-    if (!FileOps.isAmmonite(file)) doFormatOne(code, style, file, range)
-    else {
-      // XXX: we won't support ranges as we don't keep track of lines
-      val chunks = ammonitePattern.split(code)
-      if (chunks.length <= 1) doFormatOne(code, style, file, range)
-      else
-        flatMapAll(chunks.iterator)(doFormatOne(_, style, file))
-          .map(_.mkString("\n@\n"))
-    }
+  ): Try[String] = if (!FileOps.isAmmonite(file))
+    doFormatOne(code, style, file, range)
+  else {
+    // XXX: we won't support ranges as we don't keep track of lines
+    val chunks = ammonitePattern.split(code)
+    if (chunks.length <= 1) doFormatOne(code, style, file, range)
+    else
+      flatMapAll(chunks.iterator)(doFormatOne(_, style, file))
+        .map(_.mkString("\n@\n"))
+  }
 
   private def doFormatOne(
       code: String,

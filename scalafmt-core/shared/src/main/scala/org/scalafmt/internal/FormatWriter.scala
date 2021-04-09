@@ -589,7 +589,8 @@ class FormatWriter(formatOps: FormatOps) {
             sb.append(" */")
           } else {
             val trimmed = removeTrailingWhiteSpace(text)
-            sb.append(leadingAsteriskSpace.matcher(trimmed).replaceAll(spaces))
+            // TODO ?
+            sb.append(leadingAsteriskSpace.matcher(trimmed).replaceAll(spaces+ "$1") )
           }
         }
 
@@ -1400,7 +1401,8 @@ object FormatWriter {
   private def getIndentation(len: Int): String =
     if (len < indentations.length) indentations(len) else " " * len
 
-  private val trailingSpace = Pattern.compile("\\h++$", Pattern.MULTILINE)
+  private val trailingSpace = PlatformCompat.trailingSpace
+
   private def removeTrailingWhiteSpace(str: String): String = {
     trailingSpace.matcher(str).replaceAll("")
   }
@@ -1409,31 +1411,23 @@ object FormatWriter {
     regex.splitAsStream(value).iterator().asScala
 
   // "slc" stands for single-line comment
-  private val slcDelim = Pattern.compile("\\h++")
+  private val slcDelim = PlatformCompat.slcDelim
   // "mlc" stands for multi-line comment
-  private val mlcHeader = Pattern.compile("^/\\*\\h*+(?:\n\\h*+[*]*+\\h*+)?")
-  private val mlcLineDelim = Pattern.compile("\\h*+\n\\h*+[*]*+\\h*+")
-  private val mlcParagraphEnd = Pattern.compile("[.:!?=]$")
-  private val mlcParagraphBeg = Pattern.compile("^(?:[-*@=]|\\d++[.:])")
+  private val mlcHeader = PlatformCompat.mlcHeader
+  private val mlcLineDelim = PlatformCompat.mlcLineDelim
+  private val mlcParagraphEnd = PlatformCompat.mlcParagraphEnd
+  private val mlcParagraphBeg = PlatformCompat.mlcParagraphBeg
 
-  private val leadingAsteriskSpace = Pattern.compile("(?<=\n)\\h*+(?=[*][^*])")
-  private val docstringLine =
-    Pattern.compile("^(?:\\h*+\\*)?(\\h*+)(.*?)\\h*+$", Pattern.MULTILINE)
-  private val onelineDocstring = {
-    val empty = "\\h*+(\n\\h*+\\*?\\h*+)*"
-    Pattern.compile(s"^/\\*\\*$empty([^*\n\\h](?:[^\n]*[^\n\\h])?)$empty\\*/$$")
-  }
-  private val docstringLeadingSpace = Pattern.compile("^\\h++")
+  private val leadingAsteriskSpace = PlatformCompat.leadingAsteriskSpace
+  private val docstringLine = PlatformCompat.docstringLine
+  private val onelineDocstring = PlatformCompat.onelineDocstring
+  private val docstringLeadingSpace = PlatformCompat.docstringLeadingSpace
 
   @inline
   private def getStripMarginPattern(pipe: Char) =
-    if (pipe == '|') leadingPipeSpace else compileStripMarginPattern(pipe)
+    if (pipe == '|') leadingPipeSpace else PlatformCompat.compileStripMarginPattern(pipe)
 
-  @inline
-  private def compileStripMarginPattern(pipe: Char) =
-    Pattern.compile(s"(?<=\n)\\h*+(?=\\${pipe})")
-
-  private val leadingPipeSpace = compileStripMarginPattern('|')
+  private val leadingPipeSpace = PlatformCompat.compileStripMarginPattern('|')
 
   /** [[https://dotty.epfl.ch/docs/reference/other-new-features/indentation.html#the-end-marker]] */
   private def getEndMarkerLabel(tree: Tree): String = tree match {

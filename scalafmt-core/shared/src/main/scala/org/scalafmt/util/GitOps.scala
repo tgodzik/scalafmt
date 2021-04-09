@@ -4,6 +4,8 @@ import scala.sys.process.ProcessLogger
 import scala.util.Try
 import scala.util.control.NonFatal
 import java.io.File
+import java.io.BufferedReader
+import java.io.InputStreamReader
 
 trait GitOps {
   def status: Seq[AbsoluteFile]
@@ -20,10 +22,21 @@ class GitOpsImpl(private[util] val workingDirectory: AbsoluteFile)
       val lastError = new StringBuilder
       val swallowStderr = ProcessLogger(_ => (), err => lastError.append(err))
       try {
-        sys.process
-          .Process(cmd, workingDirectory.jfile)
-          .!!(swallowStderr)
-          .trim
+        //TODO make it nicer
+        val processBuilder = new ProcessBuilder()
+        val out = new StringBuilder()
+        processBuilder.command(cmd: _*);
+        var process = processBuilder.start()
+
+        val reader =
+          new BufferedReader(new InputStreamReader(process.getInputStream()))
+
+        var line = reader.readLine()
+        while (line != null) {
+          out.append(line + "\n")
+          line = reader.readLine()
+        }
+        out.toString()
       } catch {
         case NonFatal(e) =>
           throw new IllegalStateException(

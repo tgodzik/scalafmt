@@ -4,6 +4,9 @@ import java.io.File
 
 import metaconfig._
 import org.scalafmt.config.PlatformConfig._
+import scala.meta.internal.io.FileIO
+import scala.meta.io.AbsolutePath
+import java.nio.charset.StandardCharsets
 
 // NOTE: these methods are intended for internal usage and are subject to
 // binary and source breaking changes between any release. For a stable API
@@ -14,10 +17,12 @@ object Config {
   def hoconStringToConf(input: String, path: Option[String]): Configured[Conf] =
     Input.String(input).parse(path)
 
-  def hoconFileToConf(input: File, path: Option[String]): Configured[Conf] =
+  def hoconFileToConf(input: File, path: Option[String]): Configured[Conf] =  {
+    val string = FileIO.slurp(AbsolutePath(input.toPath()), StandardCharsets.UTF_8)
     Configured
-      .fromExceptionThrowing(Input.File(input))
+      .fromExceptionThrowing(Input.String(string))
       .andThen(_.parse(path))
+  }
 
   def fromHoconString(string: String): Configured[ScalafmtConfig] =
     fromHoconString(string, None)
