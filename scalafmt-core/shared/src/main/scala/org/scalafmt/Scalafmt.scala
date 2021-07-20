@@ -7,7 +7,6 @@ import scala.meta.Input
 import scala.util.Failure
 import scala.util.Success
 import scala.util.Try
-import scala.util.matching.Regex
 
 import org.scalafmt.config.Config
 import org.scalafmt.Error.PreciseIncomplete
@@ -91,9 +90,6 @@ object Scalafmt {
     iter(Seq.empty)
   }
 
-  // see: https://ammonite.io/#Save/LoadSession
-  private val ammonitePattern: Regex = PlatformCompat.ammonitePattern
-
   private def doFormat(
       code: String,
       style: ScalafmtConfig,
@@ -103,7 +99,8 @@ object Scalafmt {
     doFormatOne(code, style, file, range)
   else {
     // XXX: we won't support ranges as we don't keep track of lines
-    val chunks = ammonitePattern.split(code)
+    // see: https://ammonite.io/#Save/LoadSession
+    val chunks = PlatformCompat.splitByAmmonitePattern(code)
     if (chunks.length <= 1) doFormatOne(code, style, file, range)
     else
       flatMapAll(chunks.iterator)(doFormatOne(_, style, file))

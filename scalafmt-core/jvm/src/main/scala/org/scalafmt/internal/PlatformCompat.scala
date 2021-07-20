@@ -4,8 +4,6 @@ import java.util.regex.Pattern
 import scala.util.matching.Regex
 
 object PlatformCompat {
-  @inline
-  def fixRegex(reg: String) = reg
 
   @inline
   val trailingSpace =
@@ -19,7 +17,7 @@ object PlatformCompat {
     Pattern.compile("^/\\*\\h*+(?:\n\\h*+[*]*+\\h*+)?")
   @inline
   val mlcLineDelim =
-    Pattern.compile(PlatformCompat.fixRegex("\\h*+\n\\h*+[*]*+\\h*+"))
+    Pattern.compile("\\h*+\n\\h*+[*]*+\\h*+")
   @inline
   val mlcParagraphEnd = Pattern.compile("[.:!?=]$")
   @inline
@@ -46,13 +44,34 @@ object PlatformCompat {
 
   @inline
   def compileStripMarginPattern(pipe: Char) =
-    Pattern.compile(PlatformCompat.fixRegex(s"(?<=\n)\\h*+(?=\\${pipe})"))
+    Pattern.compile(s"(?<=\n)\\h*+(?=\\${pipe})")
 
   // see: https://ammonite.io/#Save/LoadSession
   @inline
-  val ammonitePattern: Regex = "(?:\\s*\\n@(?=\\s))+".r
+  private val ammonitePattern: Regex = "(?:\\s*\\n@(?=\\s))+".r
 
   @inline
   val stripMarginPattern =
     Pattern.compile("\n(\\h*+\\|)?([^\n]*+)")
+
+  @inline
+  def replaceAllStripMargin(
+      stripMarginPattern: Pattern,
+      text: String,
+      spaces: String,
+      pipe: Char
+  ): String =
+    stripMarginPattern.matcher(text).replaceAll(spaces)
+
+  @inline
+  def replaceAllLeadingAsterisk(
+      leadingAsteriskSpace: Pattern,
+      trimmed: String,
+      spaces: String
+  ): String =
+    leadingAsteriskSpace.matcher(trimmed).replaceAll(spaces)
+
+  @inline
+  def splitByAmmonitePattern(code: String): Array[String] =
+    ammonitePattern.split(code)
 }

@@ -407,7 +407,12 @@ class FormatWriter(formatOps: FormatOps) {
         }
         tupleOpt.fold(text) { case (pipe, indent) =>
           val spaces = getIndentation(indent)
-          getStripMarginPattern(pipe).matcher(text).replaceAll(spaces)
+          PlatformCompat.replaceAllStripMargin(
+            getStripMarginPattern(pipe),
+            text,
+            spaces,
+            pipe
+          )
         }
       }
 
@@ -589,8 +594,13 @@ class FormatWriter(formatOps: FormatOps) {
             sb.append(" */")
           } else {
             val trimmed = removeTrailingWhiteSpace(text)
-            // TODO ?
-            sb.append(leadingAsteriskSpace.matcher(trimmed).replaceAll(spaces+ "$1") )
+            sb.append(
+              PlatformCompat.replaceAllLeadingAsterisk(
+                leadingAsteriskSpace,
+                trimmed,
+                spaces
+              )
+            )
           }
         }
 
@@ -1425,7 +1435,8 @@ object FormatWriter {
 
   @inline
   private def getStripMarginPattern(pipe: Char) =
-    if (pipe == '|') leadingPipeSpace else PlatformCompat.compileStripMarginPattern(pipe)
+    if (pipe == '|') leadingPipeSpace
+    else PlatformCompat.compileStripMarginPattern(pipe)
 
   private val leadingPipeSpace = PlatformCompat.compileStripMarginPattern('|')
 
