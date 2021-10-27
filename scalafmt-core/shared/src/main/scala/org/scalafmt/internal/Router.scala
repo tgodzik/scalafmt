@@ -474,7 +474,7 @@ class Router(formatOps: FormatOps) {
           if (isCaseBodyABlock(ft, owner)) Seq(baseSplit)
           else if (isCaseBodyEnclosedAsBlock(ft, owner)) Seq(baseSplit)
           else if (ft.right.is[T.KwCase]) Seq(nlSplit(ft)(0))
-          else if (beforeMultiline eq Newlines.unfold) {
+          else if (style.newlines.shouldUnfoldBeforeMultiline(ft.hasBreak)) {
             if (ft.right.is[T.Semicolon]) Seq(baseSplit, nlSplit(ft)(1))
             else Seq(nlSplit(ft)(0))
           } else if (ft.hasBreak && !beforeMultiline.ignoreSourceSplit)
@@ -1839,7 +1839,7 @@ class Router(formatOps: FormatOps) {
         Seq(split)
       case FormatToken(_: T.KwFor, right, _) =>
         Seq(Split(Space(style.spaces.isSpaceAfterKeyword(right)), 0))
-      case FormatToken(close: T.RightParen, right, _) if (leftOwner match {
+      case ft @ FormatToken(close: T.RightParen, right, _) if (leftOwner match {
             case _: Term.If => !nextNonComment(formatToken).right.is[T.KwThen]
             case _: Term.For => true
             case _: Term.ForYield => style.indentYieldKeyword
@@ -1855,7 +1855,7 @@ class Router(formatOps: FormatOps) {
         val expire = getLastToken(body)
         def nlSplitFunc(cost: Int)(implicit l: sourcecode.Line) =
           Split(Newline, cost).withIndent(style.indent.main, expire, After)
-        if (style.newlines.getBeforeMultiline eq Newlines.unfold)
+        if (style.newlines.shouldUnfoldBeforeMultiline(nextNonComment(ft).hasBreak))
           CtrlBodySplits.checkComment(formatToken, nlSplitFunc) { ft =>
             if (ft.right.is[T.LeftBrace]) {
               val nextFt = nextNonCommentSameLine(next(ft))
@@ -1895,7 +1895,7 @@ class Router(formatOps: FormatOps) {
           Split(Newline, 1)
         )
       // Last else branch
-      case FormatToken(_: T.KwElse, _, _) if (leftOwner match {
+      case ft @ FormatToken(_: T.KwElse, _, _) if (leftOwner match {
             case t: Term.If => !t.elsep.is[Term.If]
             case x => throw new UnexpectedTree[Term.If](x)
           }) =>
@@ -1903,7 +1903,7 @@ class Router(formatOps: FormatOps) {
         val expire = getLastToken(body)
         def nlSplitFunc(cost: Int) =
           Split(Newline, cost).withIndent(style.indent.main, expire, After)
-        if (style.newlines.getBeforeMultiline eq Newlines.unfold)
+        if (style.newlines.shouldUnfoldBeforeMultiline(nextNonComment(ft).hasBreak))
           Seq(nlSplitFunc(0))
         else
           CtrlBodySplits.get(formatToken, body) {

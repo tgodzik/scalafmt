@@ -53,10 +53,8 @@ inline def update(delta: Int) = inline if (delta >= 0) increaseBy(delta)
    else decreaseBy(-delta)
 >>>
 inline def update(delta: Int) =
-  inline if (delta >= 0)
-    increaseBy(delta)
-  else
-    decreaseBy(-delta)
+  inline if (delta >= 0) increaseBy(delta)
+  else decreaseBy(-delta)
 <<< inline match
 transparent   inline def g(x: Any): Any =   inline x match {
          case x: String => (x, x) // Tuple2[String, String](x, x)
@@ -91,10 +89,8 @@ transparent inline def g(x: Any): Any =   inline x match {
 >>>
 transparent inline def g(x: Any): Any =
   inline x match {
-    case x: String =>
-      (x, x) // Tuple2[String, String](x, x)
-    case x: Double =>
-      x
+    case x: String => (x, x) // Tuple2[String, String](x, x)
+    case x: Double => x
   }
 <<< complex
 inline def repro[T <: Int with Singleton  ,   U <: Int with Singleton]: Int = 

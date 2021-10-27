@@ -84,3 +84,37 @@ def anotherMethod(): Unit = doOtherStuff()
 def myMethod(): Unit = doSomeStuff()
 @main
 def anotherMethod(): Unit = doOtherStuff()
+
+<<< sbt
+runner.dialect = "sbt1"
+
+newlines {
+    source = fold
+    topLevelStatementBlankLines = [
+        {
+            blanks = 1
+        }
+    ]
+    beforeTemplateBodyIfBreakInParentCtors = true
+    beforeMultiline = unfold
+    forceBeforeMultilineAssign = never
+    alwaysBeforeElseAfterCurlyIf = true
+    beforeCurlyLambdaParams = never
+    afterCurlyLambdaParams = never
+    implicitParamListModifierPrefer = after
+    avoidForSimpleOverflow = [tooLong, slc]
+    avoidInResultType = true
+    selectChains = unfold
+}
+
+maxColumn = 100
+===
+assembly / assemblyMergeStrategy := {
+  case PathList("META-INF", xs @ _*) => MergeStrategy.discard
+  case _ => MergeStrategy.first
+}
+>>>
+assembly / assemblyMergeStrategy := {
+  case PathList("META-INF", xs @ _*) => MergeStrategy.discard
+  case _                             => MergeStrategy.first
+}

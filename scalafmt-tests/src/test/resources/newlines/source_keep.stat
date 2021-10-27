@@ -2991,7 +2991,7 @@ object a {
       }
   }
 }
-<<< #2113 case 7, beforeMultiline = unfold
+<<< ONLY #2113 case 7, beforeMultiline = unfold
 newlines.beforeMultiline = unfold
 ===
 object a {
