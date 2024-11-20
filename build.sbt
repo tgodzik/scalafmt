@@ -95,7 +95,7 @@ lazy val interfaces = crossProject(JVMPlatform, NativePlatform)
       IO.write(props, "scalafmt properties", out)
       List(out)
     },
-  )
+  ).nativeSettings(publish / skip := true)
 
 lazy val sysops = crossProject(JVMPlatform, NativePlatform)
   .withoutSuffixFor(JVMPlatform).in(file("scalafmt-sysops")).settings(
