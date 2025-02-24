@@ -16,18 +16,17 @@ permissions:
 
 jobs:
   scala-native:
-    if: github.event_name == 'release'
     permissions:
       contents: write  # for actions/upload-release-asset to upload release asset
     strategy:
       fail-fast: false
       matrix:
         deploy: [
-          { os: macOS-13, name: scalafmt-x86_64-apple-darwin },
-          { os: macOS-14, name: scalafmt-aarch64-apple-darwin },
-          { os: ubuntu-latest, name: scalafmt-x86_64-pc-linux },
-          { os: ubuntu-24.04-arm, name: scalafmt-aarch64-pc-linux },
-          { os: windows-latest, name: scalafmt-x86_64-pc-win32 }
+          { os: macOS-13, name: scalafmt-x86_64-apple-darwin.zip },
+          { os: macOS-14, name: scalafmt-aarch64-apple-darwin.zip },
+          { os: ubuntu-latest, name: scalafmt-x86_64-pc-linux.zip },
+          { os: ubuntu-24.04-arm, name: scalafmt-aarch64-pc-linux.zip },
+          { os: windows-latest, name: scalafmt-x86_64-pc-win32.zip }
         ]
     runs-on: ${{ matrix.deploy.os }}
     env:
@@ -45,17 +44,19 @@ jobs:
       - run: sbt scala-native
         env:
           CI: true
+      - name: Zip artifact for deployment
+        run: zip ${{ matrix.deploy.name }} env.BINARY_NAME
       - uses: actions/upload-artifact@master
         with:
           name: ${{ matrix.deploy.name }}
-          path: ${{ env.BINARY_NAME }}
+          path: ${{ matrix.deploy.name }}
       - name: Upload release to Github
         uses: actions/upload-release-asset@v1.0.2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ github.event.release.upload_url }}
-          asset_path: ${{ env.BINARY_NAME }}
+          asset_path: ${{ matrix.deploy.name }}
           asset_name: ${{ matrix.deploy.name }}
           asset_content_type: application/zip
   dockerize:
